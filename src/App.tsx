@@ -1,8 +1,9 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Gauge, History, Radio, Trophy, Users } from "lucide-react";
+import { Gauge, History, Radio, Timer, Trophy, Users } from "lucide-react";
 import RaceHub from "./components/RaceHub";
 import ProfileMenu from "./components/ProfileMenu";
 
+const Sessions = lazy(() => import("./components/Sessions"));
 const LiveReplay = lazy(() => import("./components/LiveReplay"));
 const Standings = lazy(() => import("./components/Standings"));
 const Drivers = lazy(() => import("./components/Drivers"));
@@ -12,10 +13,11 @@ import { formatDate, raceLabel } from "./lib/format";
 import { useI18n } from "./lib/i18n";
 import { usePicks, useSettings } from "./lib/storage";
 
-type Tab = "corrida" | "ao-vivo" | "classificacao" | "pilotos" | "historia";
+type Tab = "corrida" | "sessoes" | "ao-vivo" | "classificacao" | "pilotos" | "historia";
 
 const TABS: { id: Tab; label: string; icon: typeof Gauge }[] = [
   { id: "corrida", label: "Corrida", icon: Gauge },
+  { id: "sessoes", label: "Sessões", icon: Timer },
   { id: "ao-vivo", label: "Ao vivo", icon: Radio },
   { id: "classificacao", label: "Classificação", icon: Trophy },
   { id: "pilotos", label: "Pilotos", icon: Users },
@@ -119,6 +121,7 @@ export default function App() {
             onGoLive={() => navigate("ao-vivo")}
           />
         )}
+        {tab === "sessoes" && <Sessions />}
         {tab === "ao-vivo" && <LiveReplay />}
         {tab === "classificacao" && (
           <Standings

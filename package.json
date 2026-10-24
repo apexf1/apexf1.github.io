@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "data:history": "node scripts/build-history.mjs"
+    "data:history": "node scripts/build-history.mjs",
+    "data:sessions": "node scripts/build-sessions.mjs"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.11",

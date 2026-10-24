@@ -1,7 +1,8 @@
 # APEX — Race Intelligence
 
-Hub de corrida da Fórmula 1: previsões, replay, mapa 3D do traçado, classificação,
-perfis de pilotos e um arquivo com todas as temporadas desde 1950.
+Hub de corrida da Fórmula 1: previsões, replay, mapa 3D do traçado, sessões do fim
+de semana (treinos livres e qualificação), classificação, perfis de pilotos e um
+arquivo com todas as temporadas desde 1950.
 
 ## Rodar
 
@@ -77,6 +78,24 @@ O build do Pages corre com `VITE_BASE=<repo>` para os assets e as fontes apontar
 para `/<repo>/`. A chave publishable do Clerk está em `.env.production` (é pública e
 vai para o bundle); substitua-a se mudar de aplicação Clerk. A URL do Pages é um
 novo domínio, por isso confirme que a instância do Clerk aceita a origem.
+
+## Sessões do fim de semana
+
+A aba **Sessões** mostra FP1/FP2/FP3 (ou a classificação sprint nos fins de semana
+com sprint) e a qualificação de cada etapa de 2026, com tempos, voltas e gaps. O
+calendário de sessões e os resultados dos treinos vêm da API pública da OpenF1, e a
+grelha de qualificação (Q1/Q2/Q3) vem do arquivo da temporada.
+
+Os dados ficam em `src/data/sessions2026.json` e são gerados por:
+
+```bash
+npm run data:sessions
+```
+
+O script mapeia cada reunião da OpenF1 para a etapa correspondente do calendário,
+respeita o limite de pedidos da API e guarda cache em `.cache/openf1-sessions`.
+Sessões ainda por realizar aparecem com o horário de Brasília; se a fonte publicar
+apenas parte dos pilotos, a tabela indica isso em vez de inventar tempos.
 
 ## Arquivo histórico (F1 History)
 
