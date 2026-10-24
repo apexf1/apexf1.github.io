@@ -1,0 +1,11 @@
+{
+  // Local Workers test config (wrangler dev). The Sites deploy uses sites.manifest.json.
+  "name": "apex-f1",
+  "compatibility_date": "2025-09-01",
+  "main": "worker/index.js",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  }
+}

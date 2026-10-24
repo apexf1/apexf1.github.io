@@ -1,0 +1,17 @@
+node_modules
+dist
+.tools
+*.local
+.DS_Store
+.cache
+
+# local env (Clerk key)
+.env
+.env.local
+
+# metadados locais do Freebuff Sites
+.sites.json
+.freebuff
+
+# estado local do wrangler/workerd
+.wrangler

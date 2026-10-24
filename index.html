@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07080b" />
+    <meta
+      name="description"
+      content="APEX é o hub de corrida da F1: previsões de vitória com probabilidades, replay da última corrida, estratégia e matemática do título."
+    />
+    <meta property="og:title" content="APEX — Hub de corrida da F1" />
+    <meta
+      property="og:description"
+      content="Previsões, replay e estratégia para elevar sua experiência de assistir à F1."
+    />
+    <title>APEX — Hub de corrida da F1</title>
+    <script>
+      // aplica o tema antes da primeira pintura para não piscar
+      try {
+        var saved = JSON.parse(localStorage.getItem("apex.prefs.v2") || "null");
+        var theme = (saved && saved.theme) || "dark";
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
