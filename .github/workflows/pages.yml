@@ -32,7 +32,7 @@ jobs:
       - name: Build
         env:
           # um repositório <org>.github.io é servido na raiz; os restantes em /<repo>/
-          VITE_BASE: ${{ endsWith(github.event.repository.name, '.github.io') && '/' || github.event.repository.name }}
+          VITE_BASE: ${{ endsWith(github.repository, '.github.io') && '/' || github.event.repository.name }}
         run: npm run build
 
       - uses: actions/configure-pages@v5

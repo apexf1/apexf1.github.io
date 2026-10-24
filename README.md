@@ -69,15 +69,21 @@ Biografias e textos de circuito são conteúdo gerado e ficam em português.
 O repositório inclui `.github/workflows/pages.yml`: cada push para `main` corre
 `typecheck`, os testes e o build, e publica `dist/` no GitHub Pages.
 
-1. Crie um repositório **público** (ex.: `apex-f1`) e faça push de `main`.
+O site está publicado em **https://apexf1.github.io/**, a partir do repositório
+[`apexf1/apexf1.github.io`](https://github.com/apexf1/apexf1.github.io).
+
+1. Crie um repositório **público** e faça push de `main`.
 2. Em **Settings → Pages**, escolha **Build and deployment → GitHub Actions**
    (o workflow também tenta ativar o Pages sozinho).
-3. O site fica em `https://<utilizador>.github.io/<repo>/`.
+3. Um repositório chamado `<org>.github.io` é servido na **raiz**
+   (`https://<org>.github.io/`); qualquer outro nome fica em
+   `https://<utilizador>.github.io/<repo>/`.
 
-O build do Pages corre com `VITE_BASE=<repo>` para os assets e as fontes apontarem
-para `/<repo>/`. A chave publishable do Clerk está em `.env.production` (é pública e
-vai para o bundle); substitua-a se mudar de aplicação Clerk. A URL do Pages é um
-novo domínio, por isso confirme que a instância do Clerk aceita a origem.
+O workflow deteta o caso: se o nome do repositório termina em `.github.io` passa
+`VITE_BASE=/`, senão passa o nome do repositório para os assets e as fontes
+apontarem para `/<repo>/`. A chave publishable do Clerk está em `.env.production`
+(é pública e vai para o bundle); substitua-a se mudar de aplicação Clerk. A URL do
+Pages é um novo domínio, por isso confirme que a instância do Clerk aceita a origem.
 
 ## Sessões do fim de semana
 
