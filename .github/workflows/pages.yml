@@ -31,8 +31,8 @@ jobs:
 
       - name: Build
         env:
-          # o Pages serve o projeto em /<repo>/
-          VITE_BASE: ${{ github.event.repository.name }}
+          # um repositório <org>.github.io é servido na raiz; os restantes em /<repo>/
+          VITE_BASE: ${{ endsWith(github.event.repository.name, '.github.io') && '/' || github.event.repository.name }}
         run: npm run build
 
       - uses: actions/configure-pages@v5
