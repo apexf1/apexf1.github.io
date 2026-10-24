@@ -180,7 +180,7 @@ export default function Sessions() {
                   <span className="weekend-round-flag">{item.flag}</span>
                   <span className="weekend-round-name">
                     <strong>{raceLabel(item)}</strong>
-                    <span>{formatDate(item.date)}</span>
+                    <span>{formatDate(item.startUTC)}</span>
                   </span>
                   <span className="weekend-round-state">
                     {done ? t("Concluída") : item.round === upcoming.round ? t("A seguir") : t("Por realizar")}
