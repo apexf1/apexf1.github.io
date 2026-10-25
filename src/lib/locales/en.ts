@@ -525,4 +525,67 @@ export const en: Record<string, string> = {
     "{weather} · chaos {chaos}/100 · Safety Car {sc} · most likely podium {podium}",
   "Modelo Monte Carlo com dados Jolpica-F1 + OpenF1 · projeção, não certeza. Jogue com responsabilidade.":
     "Monte Carlo model with Jolpica-F1 + OpenF1 data · a projection, not a certainty. Play responsibly.",
+
+  // ── Segundo ecrã: previsão de ultrapassagem ───────────────────────────
+  "2.º Ecrã": "Second Screen",
+  "Segundo ecrã · OpenF1": "Second screen · OpenF1",
+  "Previsão de": "Overtake",
+  ultrapassagem: "prediction",
+  "O painel compara o ritmo das últimas 3 voltas e calcula quando o piloto de trás deve chegar ao da frente. Sem introduzir dados à mão.":
+    "The panel compares the last 3 laps' pace and works out when the chasing driver should reach the car ahead. No manual input.",
+  "em direto": "live",
+  demonstração: "demo",
+  "Atualizar dados": "Refresh data",
+  Atualizar: "Refresh",
+  "Modo demonstração · dados simulados": "Demo mode · simulated data",
+  "A OpenF1 não respondeu. Enquanto isso, vês uma corrida simulada com a mesma lógica do painel.":
+    "OpenF1 did not respond. Meanwhile you're seeing a simulated race with the same panel logic.",
+  "A sessão em direto não é uma corrida. Os números abaixo são simulados.":
+    "The live session isn't a race. The numbers below are simulated.",
+  "Não há corrida em direto neste momento. Os números abaixo são simulados.":
+    "There is no live race right now. The numbers below are simulated.",
+  "Ligar à OpenF1": "Connect to OpenF1",
+  "Sem leitura nova da OpenF1": "No new reading from OpenF1",
+  "A mostrar o último valor recebido. A tentar de novo a cada 10 s.":
+    "Showing the last received value. Retrying every 10 seconds.",
+  "Piloto 1": "Driver 1",
+  "Piloto 2": "Driver 2",
+  "Na frente": "Ahead",
+  Atrás: "Behind",
+  intervalo: "interval",
+  pressão: "pressure",
+  "Pressão de ultrapassagem · {state}": "Overtake pressure · {state}",
+  "Pressão de ultrapassagem": "Overtake pressure",
+  iminente: "imminent",
+  "a aproximar-se": "closing in",
+  "a construir": "building",
+  "sem pressão": "no pressure",
+  "Δ ritmo por volta": "Δ pace per lap",
+  "a favor de {code}": "in {code}'s favour",
+  "Voltas para a ultrapassagem": "Laps to the overtake",
+  "gap ÷ ganho por volta": "gap ÷ gain per lap",
+  "Volta prevista": "Predicted lap",
+  "volta atual desconhecida": "current lap unknown",
+  "volta atual {lap}": "current lap {lap}",
+  "atualizado às {time} · novo pedido a cada 10 s": "updated at {time} · new request every 10s",
+  "à espera da primeira leitura": "waiting for the first reading",
+  "simulação · atualiza a cada 10 s": "simulation · updates every 10s",
+  "Média das últimas 3 voltas limpas (sem out-laps nem safety car). Assume pista livre entre os dois.":
+    "Average of the last 3 clean laps (no out-laps or safety car). Assumes clear track between the two.",
+  "Ainda não há voltas limpas suficientes para calcular o ritmo. A previsão aparece após 3 voltas.":
+    "Not enough clean laps to calculate pace yet. The prediction appears after 3 laps.",
+  "À espera de dados da sessão. A primeira leitura pode demorar alguns segundos.":
+    "Waiting for session data. The first reading can take a few seconds.",
+  "ritmo médio": "average pace",
+  "{behind} está a tirar {delta}s por volta a {ahead}. Ultrapassagem estimada na volta {lap}.":
+    "{behind} is taking {delta}s a lap out of {ahead}. Overtake estimated on lap {lap}.",
+  "{behind} está {delta}s por volta mais lento que {ahead}. O intervalo de {gap}s mantém-se.":
+    "{behind} is {delta}s a lap slower than {ahead}. The {gap}s gap holds.",
+  "{ahead} e {behind} estão lado a lado — a ultrapassagem pode acontecer nesta volta.":
+    "{ahead} and {behind} are side by side — the overtake could happen this lap.",
+  "{behind} está uma volta atrás de {ahead}; não há previsão de ultrapassagem.":
+    "{behind} is a lap down on {ahead}; no overtake prediction.",
+  "{behind} está a tirar {delta}s por volta a {ahead}, mas faltam {remaining} voltas — a ultrapassagem deve ficar para depois da bandeira.":
+    "{behind} is taking {delta}s a lap out of {ahead}, but only {remaining} laps remain — the overtake should have to wait until after the flag.",
+  "faltam {n} voltas": "{n} laps remaining",
 };

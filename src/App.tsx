@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Gauge, History, Radio, Timer, Trophy, Users } from "lucide-react";
+import { Gauge, History, MonitorSmartphone, Radio, Timer, Trophy, Users } from "lucide-react";
 import RaceHub from "./components/RaceHub";
 import ProfileMenu from "./components/ProfileMenu";
 
@@ -8,17 +8,26 @@ const LiveReplay = lazy(() => import("./components/LiveReplay"));
 const Standings = lazy(() => import("./components/Standings"));
 const Drivers = lazy(() => import("./components/Drivers"));
 const F1History = lazy(() => import("./components/F1History"));
+const SecondScreen = lazy(() => import("./components/SecondScreen"));
 import { getUpcomingRace, season } from "./lib/data";
 import { formatDate, raceLabel } from "./lib/format";
 import { useI18n } from "./lib/i18n";
 import { usePicks, useSettings } from "./lib/storage";
 
-type Tab = "corrida" | "sessoes" | "ao-vivo" | "classificacao" | "pilotos" | "historia";
+type Tab =
+  | "corrida"
+  | "sessoes"
+  | "ao-vivo"
+  | "segundo"
+  | "classificacao"
+  | "pilotos"
+  | "historia";
 
 const TABS: { id: Tab; label: string; icon: typeof Gauge }[] = [
   { id: "corrida", label: "Corrida", icon: Gauge },
   { id: "sessoes", label: "Sessões", icon: Timer },
   { id: "ao-vivo", label: "Ao vivo", icon: Radio },
+  { id: "segundo", label: "2.º Ecrã", icon: MonitorSmartphone },
   { id: "classificacao", label: "Classificação", icon: Trophy },
   { id: "pilotos", label: "Pilotos", icon: Users },
   { id: "historia", label: "F1 History", icon: History },
@@ -123,6 +132,7 @@ export default function App() {
         )}
         {tab === "sessoes" && <Sessions />}
         {tab === "ao-vivo" && <LiveReplay />}
+        {tab === "segundo" && <SecondScreen />}
         {tab === "classificacao" && (
           <Standings
             onCompareDriver={(code) => {
