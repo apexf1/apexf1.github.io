@@ -4913,3 +4913,17 @@ button.season-champion:hover {
     padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* O painel do perfil é mais largo do que o espaço à direita do botão; em
+   ecrãs estreitos ancora à barra inteira para não sair pela margem esquerda. */
+@media (max-width: 900px) {
+  .profile-panel {
+    position: fixed;
+    top: 68px;
+    right: 12px;
+    left: auto;
+    width: min(360px, calc(100vw - 24px));
+    max-width: none;
+    max-height: calc(100dvh - 80px);
+  }
+}
