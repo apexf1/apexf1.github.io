@@ -3,9 +3,9 @@
  * Constrói src/data/sessions2026.json a partir da API pública da OpenF1.
  *
  * Para cada ronda do calendário da app, encontra a reunião correspondente e
- * guarda os horários de FP1/FP2/FP3 e da qualificação. Os resultados dos
- * treinos vêm de /v1/session_result (melhor volta, voltas e gap ao líder).
- * A classificação oficial fica em season2026.json (Q1/Q2/Q3).
+ * guarda os horários de FP1/FP2/FP3 e da qualificação. Os resultados vêm de
+ * /v1/session_result: nos treinos, a melhor volta, as voltas e o gap ao líder;
+ * na qualificação, os tempos de Q1/Q2/Q3 de cada piloto.
  *
  * Uso: npm run data:sessions
  */
@@ -89,6 +89,13 @@ const bestNumber = (value) => {
   return null;
 };
 
+/** Duração por fase (Q1/Q2/Q3); a API devolve um array alinhado com as fases. */
+const phases = (value) => {
+  if (typeof value === "number") return [value > 0 ? value : null];
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => (typeof item === "number" && item > 0 ? item : null));
+};
+
 const rounds = [];
 let requests = 0;
 
@@ -123,7 +130,11 @@ for (const race of season.calendar) {
         cancelled: Boolean(session.is_cancelled),
       };
 
-      const timed = session.session_name.startsWith("Practice") || session.session_name === "Sprint Qualifying";
+      const isQuali = session.session_name === "Qualifying";
+      const timed =
+        session.session_name.startsWith("Practice") ||
+        session.session_name === "Sprint Qualifying" ||
+        isQuali;
       if (timed && !session.is_cancelled) {
         if (requests > 0) await sleep(700);
         requests += 1;
@@ -140,24 +151,40 @@ for (const race of season.calendar) {
               laps: row.number_of_laps ?? 0,
               time: bestNumber(row.duration),
               gap: bestNumber(row.gap_to_leader),
+              phases: phases(row.duration),
               note: row.dnf ? "DNF" : row.dns ? "DNS" : row.dsq ? "DSQ" : null,
             }));
-          const leaderTime = timedRows
-            .filter((row) => row.time !== null)
-            .reduce((best, row) => Math.min(best, row.time), Infinity);
-          const rows = timedRows
-            .sort((a, b) => (a.position ?? 99) - (b.position ?? 99))
-            .map((row) => [
-              row.code,
-              row.position,
-              row.laps,
-              row.time,
-              row.time !== null && Number.isFinite(leaderTime)
-                ? Math.max(0, Number((row.time - leaderTime).toFixed(3)))
-                : row.gap,
-              row.note,
-            ]);
-          if (rows.length) record.results = rows;
+
+          if (isQuali) {
+            // grelha: posição e os tempos de cada fase, do mais rápido ao mais lento
+            const quali = timedRows
+              .sort((a, b) => (a.position ?? 99) - (b.position ?? 99))
+              .map((row) => ({
+                code: row.code,
+                position: row.position,
+                q1: row.phases[0] ?? null,
+                q2: row.phases[1] ?? null,
+                q3: row.phases[2] ?? null,
+              }));
+            if (quali.length) record.quali = quali;
+          } else {
+            const leaderTime = timedRows
+              .filter((row) => row.time !== null)
+              .reduce((best, row) => Math.min(best, row.time), Infinity);
+            const rows = timedRows
+              .sort((a, b) => (a.position ?? 99) - (b.position ?? 99))
+              .map((row) => [
+                row.code,
+                row.position,
+                row.laps,
+                row.time,
+                row.time !== null && Number.isFinite(leaderTime)
+                  ? Math.max(0, Number((row.time - leaderTime).toFixed(3)))
+                  : row.gap,
+                row.note,
+              ]);
+            if (rows.length) record.results = rows;
+          }
         } catch (error) {
           console.warn(`R${race.round} ${session.session_name}: ${error.message}`);
         }
@@ -169,8 +196,12 @@ for (const race of season.calendar) {
 
   console.log(
     `R${String(race.round).padStart(2, "0")} ${race.shortName}: ` +
-      entry.sessions.map((s) => s.id + (s.results ? `(${s.results.length})` : "")).join(" ") ||
-      "sem sessões",
+      (entry.sessions
+        .map((s) => {
+          const count = s.results?.length ?? s.quali?.length ?? 0;
+          return s.id + (count ? `(${count})` : "");
+        })
+        .join(" ") || "sem sessões"),
   );
   rounds.push(entry);
 }

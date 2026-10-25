@@ -141,6 +141,9 @@ export default function TrackMap3D({
   const hitsRef = useRef<Hit[]>([]);
   const hoverRef = useRef<string | null>(null);
   const dragRef = useRef<{ x: number; y: number; yaw: number; pitch: number; moved: number } | null>(null);
+  /** dedos ativos no canvas, para o gesto de pinça */
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchRef = useRef<{ gap: number; dist: number } | null>(null);
 
   const [preset, setPreset] = useState<Preset>("tv");
   const [labels, setLabels] = useState(!compact);
@@ -606,12 +609,41 @@ export default function TrackMap3D({
     return best;
   };
 
+  const zoomBy = (factor: number) => {
+    const span = Math.max(geo.box.span, 300);
+    camRef.current.dist = clamp(camRef.current.dist * factor, span * 0.28, span * 4);
+    dirtyRef.current = true;
+  };
+
+  const pinchGap = () => {
+    const [a, b] = [...pointersRef.current.values()];
+    return a && b ? Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)) : 0;
+  };
+
   const onPointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    dragRef.current = { x: event.clientX, y: event.clientY, yaw: camRef.current.yaw, pitch: camRef.current.pitch, moved: 0 };
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     event.currentTarget.setPointerCapture(event.pointerId);
+    if (pointersRef.current.size === 2) {
+      // segundo dedo: troca o arrasto por zoom com dois dedos
+      pinchRef.current = { gap: pinchGap(), dist: camRef.current.dist };
+      dragRef.current = null;
+      return;
+    }
+    dragRef.current = { x: event.clientX, y: event.clientY, yaw: camRef.current.yaw, pitch: camRef.current.pitch, moved: 0 };
   };
 
   const onPointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (pointersRef.current.has(event.pointerId)) {
+      pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    }
+    const pinch = pinchRef.current;
+    if (pinch && pointersRef.current.size >= 2) {
+      const span = Math.max(geo.box.span, 300);
+      const gap = pinchGap();
+      camRef.current.dist = clamp(pinch.dist * (pinch.gap / gap), span * 0.28, span * 4);
+      dirtyRef.current = true;
+      return;
+    }
     const drag = dragRef.current;
     if (drag) {
       const dx = event.clientX - drag.x;
@@ -633,6 +665,8 @@ export default function TrackMap3D({
   };
 
   const onPointerUp = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    pointersRef.current.delete(event.pointerId);
+    if (pointersRef.current.size < 2) pinchRef.current = null;
     const drag = dragRef.current;
     dragRef.current = null;
     if (!drag || drag.moved > 5 || !onFocus) return;
@@ -650,8 +684,11 @@ export default function TrackMap3D({
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
         onPointerLeave={() => {
           dragRef.current = null;
+          pinchRef.current = null;
+          pointersRef.current.clear();
           if (hoverRef.current) {
             hoverRef.current = null;
             dirtyRef.current = true;
@@ -705,6 +742,25 @@ export default function TrackMap3D({
         </button>
       </div>
 
+      <div className="map3d-zoom">
+        <button
+          type="button"
+          onClick={() => zoomBy(0.72)}
+          aria-label={t("Aproximar")}
+          title={t("Aproximar")}
+        >
+          +
+        </button>
+        <button
+          type="button"
+          onClick={() => zoomBy(1 / 0.72)}
+          aria-label={t("Afastar")}
+          title={t("Afastar")}
+        >
+          −
+        </button>
+      </div>
+
       <div className="map3d-legend">
         {cars.length > 0 && (
           <span className="map3d-legend-item">
@@ -719,7 +775,9 @@ export default function TrackMap3D({
             <Mountain size={11} /> {t("relevo real {n} m", { n: Math.round(geo.elevationM) })}
           </span>
         )}
-        {!compact && <span className="map3d-legend-hint">{t("gaps reais · arraste para girar")}</span>}
+        {!compact && (
+          <span className="map3d-legend-hint">{t("gaps reais · arraste para girar · pinça para zoom")}</span>
+        )}
       </div>
     </div>
   );

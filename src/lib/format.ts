@@ -1,6 +1,5 @@
 import { activeLang, locale, tStatic } from "./language";
-
-const TZ = "America/Sao_Paulo";
+import { activeTimeZone, zoneLabel } from "./timezone";
 
 export const pct = (value: number, digits = 0) =>
   `${(value * 100).toLocaleString(locale(), {
@@ -18,7 +17,7 @@ export const formatDate = (iso: string, opts?: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat(locale(), {
     day: "2-digit",
     month: "short",
-    timeZone: TZ,
+    timeZone: activeTimeZone(),
     ...opts,
   }).format(new Date(iso));
 
@@ -27,18 +26,21 @@ export const formatDateLong = (iso: string) =>
     weekday: "long",
     day: "2-digit",
     month: "long",
-    timeZone: TZ,
+    timeZone: activeTimeZone(),
   }).format(new Date(iso));
 
 export const formatTime = (iso: string) =>
   new Intl.DateTimeFormat(locale(), {
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: TZ,
+    timeZone: activeTimeZone(),
   }).format(new Date(iso));
 
 export const formatDateTime = (iso: string) =>
   `${formatDate(iso)} · ${formatTime(iso)}`;
+
+/** Etiqueta do fuso em uso, ex.: "Lisboa" — para acompanhar as horas. */
+export const formatZone = () => zoneLabel();
 
 export const formatGap = (gap: number | null, lapped?: boolean) => {
   if (lapped) return tStatic("1 volta");

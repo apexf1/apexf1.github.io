@@ -90,7 +90,9 @@ export const en: Record<string, string> = {
   // ── RaceHub ────────────────────────────────────────────────────────────
   "Próxima etapa": "Next round",
   "Etapa futura": "Future round",
-  "(Brasília)": "(Brasília time)",
+  "Fuso horário": "Time zone",
+  "Agora: {time}": "Now: {time}",
+  "largada": "start",
   "Largada em": "Lights out in",
   "Corrida iniciada": "Race started",
   "Contagem regressiva para a largada": "Countdown to lights out",
@@ -101,7 +103,7 @@ export const en: Record<string, string> = {
   voltas: "laps",
   "km por volta": "km per lap",
   "zonas de DRS": "DRS zones",
-  "largada BRT": "start BRT",
+
   "Projeção de vitória": "Win projection",
   "{n} sims": "{n} sims",
   "chance de vitória": "win chance",
@@ -458,7 +460,9 @@ export const en: Record<string, string> = {
   "líder": "leader",
   zebra: "kerb",
   "relevo real {n} m": "real elevation {n} m",
-  "gaps reais · arraste para girar": "real gaps · drag to rotate",
+  "gaps reais · arraste para girar · pinça para zoom": "real gaps · drag to rotate · pinch to zoom",
+  Aproximar: "Zoom in",
+  Afastar: "Zoom out",
 
   // ── Sessões do fim de semana ───────────────────────────────────────────
   Sessões: "Sessions",
@@ -495,7 +499,7 @@ export const en: Record<string, string> = {
   "Sessão por realizar.": "Session not started.",
   "Sessão em curso.": "Session in progress.",
   "Sessão cancelada.": "Session cancelled.",
-  "Começa a {date} (Brasília).": "Starts {date} (Brasília time).",
+  "Começa a {date} ({zone}).": "Starts {date} ({zone}).",
   "Os tempos aparecem aqui assim que a fonte os publicar.":
     "Times appear here as soon as the source publishes them.",
   "Sem dados publicados para esta sessão.": "No data published for this session.",
@@ -503,7 +507,8 @@ export const en: Record<string, string> = {
     "The source did not publish this session's classification.",
   "A fonte publicou apenas {n} pilotos nesta sessão.":
     "The source published only {n} drivers for this session.",
-  "Tempos oficiais Q1/Q2/Q3 · Jolpica-F1": "Official Q1/Q2/Q3 times · Jolpica-F1",
+  "Tempos Q1/Q2/Q3 · {source}": "Q1/Q2/Q3 times · {source}",
+  "atualizado às {time}": "updated at {time}",
   "Melhor volta de cada piloto · OpenF1": "Best lap per driver · OpenF1",
   "Abrir corrida": "Open race",
   sessões: "sessions",

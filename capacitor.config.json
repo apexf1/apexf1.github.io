@@ -1,0 +1,9 @@
+{
+  "appId": "com.apexf1.hub",
+  "appName": "APEX F1",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#07080b"
+  }
+}

@@ -66,9 +66,26 @@ describe("sessões do fim de semana", () => {
 
   it("abre na última sessão concluída do fim de semana atual", () => {
     const sessions = weekendByRound.get(18)?.sessions ?? [];
-    expect(defaultSessionId(sessions, 18, raceDay)).toBe("fp2");
-    const fp3 = sessions.find((session) => session.id === "fp3");
-    expect(sessionState(fp3!, 18, raceDay)).toBe("upcoming");
+    // a qualificação já foi publicada: é a última sessão com tempos
+    expect(defaultSessionId(sessions, 18, raceDay)).toBe("quali");
+    const quali = sessions.find((session) => session.id === "quali");
+    expect(sessionState(quali!, 18, raceDay)).toBe("done");
+  });
+
+  it("mostra a grelha de qualificação do fim de semana em curso", () => {
+    const quali = weekendByRound.get(18)?.sessions.find((session) => session.id === "quali");
+    expect(quali?.quali?.length).toBeGreaterThan(15);
+    const rows = classificationFor(18, quali!);
+    expect(rows[0].position).toBe(1);
+    expect(rows[0].time).toBeGreaterThan(60);
+    expect(rows[0].gap).toBe(0);
+    expect(rows.filter((row) => row.q3 !== null).length).toBeGreaterThan(5);
+  });
+
+  it("abre no primeiro treino de uma etapa ainda por realizar", () => {
+    const sessions = weekendByRound.get(19)?.sessions ?? [];
+    expect(defaultSessionId(sessions, 19, raceDay)).toBe("fp1");
+    expect(sessionState(sessions[0], 19, raceDay)).toBe("upcoming");
   });
 
   it("marca etapas futuras como por realizar", () => {

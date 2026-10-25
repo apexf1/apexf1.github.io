@@ -13,11 +13,18 @@ npm test           # testes de modelo, geometria, preferências e arquivo histó
 npm run build
 ```
 
+## App Android
+
+O mesmo site empacotado com Capacitor (`appId com.apexf1.hub`). Depois de alterar
+o código: `npm run android:sync` e `npm run android:open`. Guia completo, com os
+cliques para gerar o `app-debug.apk`, em [ANDROID.md](ANDROID.md).
+
 ## Login com Google (opcional)
 
 O login usa [Clerk](https://clerk.com). Sem chave, a app funciona em **modo local**:
-tema, piloto e equipe favoritos ficam guardados no `localStorage` deste navegador, e
-o botão de login fica desativado com uma nota de configuração.
+tema, idioma, fuso horário, piloto e equipe favoritos ficam guardados no
+`localStorage` deste navegador, e o botão de login fica desativado com uma nota de
+configuração.
 
 O projeto está ligado à aplicação Clerk **Apex Hub** (instância de desenvolvimento) e
 as chaves vivem em `.env.local`, fora do git. Para as recuperar noutra máquina:
@@ -89,10 +96,10 @@ Pages é um novo domínio, por isso confirme que a instância do Clerk aceita a 
 
 A aba **Sessões** mostra FP1/FP2/FP3 (ou a classificação sprint nos fins de semana
 com sprint) e a qualificação de cada etapa de 2026, com tempos, voltas e gaps. O
-calendário de sessões e os resultados dos treinos vêm da API pública da OpenF1, e a
-grelha de qualificação (Q1/Q2/Q3) vem do arquivo da temporada.
+calendário de sessões e os resultados (incluindo Q1/Q2/Q3) vêm da API pública da
+OpenF1.
 
-Os dados ficam em `src/data/sessions2026.json` e são gerados por:
+Os dados de base ficam em `src/data/sessions2026.json` e são gerados por:
 
 ```bash
 npm run data:sessions
@@ -100,8 +107,14 @@ npm run data:sessions
 
 O script mapeia cada reunião da OpenF1 para a etapa correspondente do calendário,
 respeita o limite de pedidos da API e guarda cache em `.cache/openf1-sessions`.
-Sessões ainda por realizar aparecem com o horário de Brasília; se a fonte publicar
-apenas parte dos pilotos, a tabela indica isso em vez de inventar tempos.
+Na app, a aba volta a consultar a OpenF1 sozinha: o fim de semana em curso é
+actualizado a cada 45 s durante as sessões e a cada 5 min fora delas, pelo que um
+resultado novo aparece sem gerar outra build. Sem rede, fica o JSON incluído.
+
+As horas aparecem no fuso do dispositivo ou no fuso escolhido pelo utilizador no
+perfil (por exemplo `Europe/Lisbon`); a escolha fica guardada com as restantes
+preferências. Se a fonte publicar apenas parte dos pilotos, a tabela indica isso
+em vez de inventar tempos.
 
 ## Arquivo histórico (F1 History)
 

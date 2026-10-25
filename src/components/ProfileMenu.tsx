@@ -3,6 +3,7 @@ import {
   Check,
   ChevronDown,
   Cloud,
+  Globe,
   HardDrive,
   LogOut,
   Moon,
@@ -15,6 +16,13 @@ import { usePrefs } from "../lib/prefs";
 import { useI18n } from "../lib/i18n";
 import { LANGS } from "../lib/language";
 import { driverByCode, drivers, teamById, teams } from "../lib/data";
+import {
+  TIME_ZONES,
+  deviceTimeZone,
+  isValidTimeZone,
+  zoneClock,
+  zoneLabel,
+} from "../lib/timezone";
 
 function GoogleIcon() {
   return (
@@ -41,8 +49,9 @@ function GoogleIcon() {
 
 export default function ProfileMenu() {
   const auth = useAuth();
-  const { prefs, setTheme, setDriver, setTeam } = usePrefs();
-  const { t, lang, setLang } = useI18n();
+  const { prefs, setTheme, setDriver, setTeam, setTimeZone } = usePrefs();
+  const { t, lang, setLang, locale } = useI18n();
+  const zone = isValidTimeZone(prefs.timezone) ? prefs.timezone : deviceTimeZone();
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const favDriver = prefs.driver ? driverByCode.get(prefs.driver) : undefined;
@@ -198,6 +207,30 @@ export default function ProfileMenu() {
                   {item.short} · {item.label}
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="profile-section">
+            <label className="profile-label" htmlFor="prefs-timezone">
+              {t("Fuso horário")}
+            </label>
+            <div className="select-wrap">
+              <Globe size={14} />
+              <select
+                id="prefs-timezone"
+                value={prefs.timezone ?? ""}
+                onChange={(event) => setTimeZone(event.target.value || null)}
+              >
+                <option value="">{t("Automático")} · {deviceTimeZone()}</option>
+                {TIME_ZONES.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="profile-hint">
+              {t("Agora: {time}", { time: zoneClock(zone, locale) })} · {zoneLabel(zone)}
             </div>
           </div>
 

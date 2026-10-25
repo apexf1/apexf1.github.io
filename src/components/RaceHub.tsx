@@ -34,6 +34,7 @@ import {
   formatDate,
   formatDateLong,
   formatTime,
+  formatZone,
   num,
   pct,
   raceLabel,
@@ -171,7 +172,7 @@ export default function RaceHub({
               </span>
               <span style={{ color: "var(--muted-2)" }}>|</span>
               <span>
-                {formatDateLong(race.startUTC)} · {formatTime(race.startUTC)} {t("(Brasília)")}
+                {formatDateLong(race.startUTC)} · {formatTime(race.startUTC)} ({formatZone()})
               </span>
             </div>
           </div>
@@ -210,7 +211,7 @@ export default function RaceHub({
               </div>
               <div className="hero-stat">
                 <strong>{formatTime(race.startUTC)}</strong>
-                <span>{t("largada BRT")}</span>
+                <span>{t("largada")}</span>
               </div>
             </div>
           </div>

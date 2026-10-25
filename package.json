@@ -9,10 +9,18 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:run": "npm run android:sync && npx cap run android",
     "data:history": "node scripts/build-history.mjs",
     "data:sessions": "node scripts/build-sessions.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
     "@clerk/clerk-react": "^5.61.11",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",

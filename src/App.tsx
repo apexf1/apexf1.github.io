@@ -136,6 +136,21 @@ export default function App() {
         </Suspense>
       </main>
 
+      <nav className="bottom-nav" aria-label={t("Navegação principal")}>
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            className={`bottom-tab${tab === id ? " is-active" : ""}`}
+            onClick={() => navigate(id)}
+            aria-current={tab === id ? "page" : undefined}
+          >
+            <Icon size={19} strokeWidth={2.2} />
+            <span>{t(label)}</span>
+          </button>
+        ))}
+      </nav>
+
       <Footer />
     </div>
   );

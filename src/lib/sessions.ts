@@ -14,6 +14,8 @@ export interface WeekendSession {
   end: string;
   cancelled: boolean;
   results?: PracticeRow[];
+  /** Q1/Q2/Q3 por piloto; presente nas sessões de qualificação publicadas. */
+  quali?: QualifyingEntry[];
 }
 
 export interface Weekend {
@@ -37,7 +39,7 @@ export const weekendByRound = new Map(file.rounds.map((weekend) => [weekend.roun
 export type SessionState = "done" | "live" | "upcoming" | "missed" | "cancelled";
 
 const hasTiming = (session: WeekendSession, round: number): boolean => {
-  if (session.id === "quali") return qualifyingByRound.has(round);
+  if (session.id === "quali") return Boolean(session.quali?.length) || qualifyingByRound.has(round);
   return Boolean(session.results?.length);
 };
 
@@ -73,7 +75,9 @@ const bestQualifyingTime = (entry: QualifyingEntry): number | null =>
 /** Classificação de uma sessão, já ordenada e com gaps calculados. */
 export function classificationFor(round: number, session: WeekendSession): ClassificationRow[] {
   if (session.id === "quali") {
-    const entries = qualifyingByRound.get(round)?.results ?? [];
+    const entries = session.quali?.length
+      ? session.quali
+      : qualifyingByRound.get(round)?.results ?? [];
     const best = entries
       .map(bestQualifyingTime)
       .filter((time): time is number => time !== null);

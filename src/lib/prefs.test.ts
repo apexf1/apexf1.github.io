@@ -11,17 +11,24 @@ import {
   type HistoryRace,
 } from "./history";
 
-const base = { theme: "dark", driver: null, team: null, lang: "pt" } as const;
+const base = { theme: "dark", driver: null, team: null, lang: "pt", timezone: null } as const;
 
 describe("sanitizePrefs", () => {
   it("aceita um perfil completo", () => {
     expect(
-      sanitizePrefs({ theme: "light", driver: "VER", team: "red_bull", lang: "en" }),
+      sanitizePrefs({
+        theme: "light",
+        driver: "VER",
+        team: "red_bull",
+        lang: "en",
+        timezone: "Europe/Lisbon",
+      }),
     ).toEqual({
       theme: "light",
       driver: "VER",
       team: "red_bull",
       lang: "en",
+      timezone: "Europe/Lisbon",
     });
   });
 
@@ -37,12 +44,25 @@ describe("sanitizePrefs", () => {
       driver: null,
       team: null,
       lang: "pt",
+      timezone: null,
     });
   });
 
   it("aceita apenas os idiomas suportados", () => {
     expect(sanitizePrefs({ lang: "en" }, base).lang).toBe("en");
     expect(sanitizePrefs({ lang: "fr" }, base).lang).toBe("pt");
+  });
+
+  it("descarta fusos horários inválidos e guarda os válidos", () => {
+    expect(sanitizePrefs({ timezone: "Europe/Lisbon" }, base).timezone).toBe("Europe/Lisbon");
+    expect(sanitizePrefs({ timezone: "Marte/Olympus" }, base).timezone).toBeNull();
+    expect(sanitizePrefs({ timezone: 42 }, base).timezone).toBeNull();
+  });
+
+  it("herda o fuso do fallback quando o perfil remoto não traz um", () => {
+    expect(
+      sanitizePrefs({}, { ...base, timezone: "Europe/Lisbon" }).timezone,
+    ).toBe("Europe/Lisbon");
   });
 });
 

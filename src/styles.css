@@ -3083,6 +3083,42 @@ a {
   height: 300px;
 }
 
+.map3d-zoom {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--map-chrome);
+  backdrop-filter: blur(8px);
+}
+
+.map3d-zoom button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: 700 19px/1 var(--font);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.map3d-zoom button:hover {
+  background: rgb(var(--ink) / 0.08);
+}
+
+.map3d-zoom button:active {
+  transform: scale(0.94);
+}
+
 .map3d-tools {
   position: absolute;
   top: 12px;
@@ -3121,6 +3157,21 @@ a {
   background: rgba(255, 45, 18, 0.16);
   color: #fff;
   box-shadow: inset 0 0 0 1px rgba(255, 45, 18, 0.4);
+}
+
+@media (max-width: 620px) {
+  .map3d-tools {
+    left: 12px;
+    max-width: calc(100% - 72px);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .map3d-tools::-webkit-scrollbar {
+    display: none;
+  }
+  .map3d-legend {
+    max-width: calc(100% - 72px);
+  }
 }
 
 .map3d-legend {
@@ -3363,6 +3414,9 @@ a {
   z-index: 60;
   width: 320px;
   max-width: calc(100vw - 32px);
+  max-height: min(82dvh, 720px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 16px;
   border-color: var(--line-strong);
   background: var(--surface);
@@ -3523,6 +3577,18 @@ a {
 .select-wrap select option {
   background: var(--surface-3);
   color: var(--text);
+}
+
+.select-wrap svg {
+  flex: none;
+  color: var(--muted);
+}
+
+.profile-hint {
+  margin-top: 7px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--muted);
 }
 
 .profile-fav {
@@ -4653,6 +4719,25 @@ button.season-champion:hover {
   min-width: 620px;
 }
 
+/* As colunas Q2/Q3/Gap são a informação principal da grelha: no telemóvel a
+   tabela desliza na horizontal em vez de as esconder (como acontece nas
+   tabelas de classificação, onde as colunas extra são secundárias). */
+@media (max-width: 760px) {
+  .session-table th:nth-child(4),
+  .session-table td:nth-child(4),
+  .session-table th:nth-child(5),
+  .session-table td:nth-child(5) {
+    display: table-cell;
+  }
+}
+
+@media (max-width: 520px) {
+  .session-table th:nth-child(6),
+  .session-table td:nth-child(6) {
+    display: table-cell;
+  }
+}
+
 .session-best {
   color: var(--purple);
   font-weight: 800;
@@ -4763,5 +4848,68 @@ button.season-champion:hover {
   }
   .session-head h2 {
     font-size: 20px;
+  }
+}
+
+/* ---------- navegação móvel (app Android) ---------- */
+.bottom-nav {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  /* a barra de topo não cabe com seis abas: passa para baixo, sempre visível */
+  .tabs {
+    display: none;
+  }
+
+  .bottom-nav {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 45;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 2px;
+    padding: 5px 4px calc(5px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--line);
+    background: var(--topbar);
+    backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  .bottom-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+    padding: 6px 2px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--muted);
+    font: 700 9.5px/1.1 var(--font);
+    letter-spacing: 0;
+    transition: 0.18s ease;
+  }
+
+  .bottom-tab span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .bottom-tab.is-active {
+    color: #fff;
+    background: linear-gradient(135deg, #ff3a20, #d81505);
+    box-shadow: 0 6px 20px -10px rgba(255, 45, 18, 0.9);
+  }
+
+  .page {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .footer {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
   }
 }

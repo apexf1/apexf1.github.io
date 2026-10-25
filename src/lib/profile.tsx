@@ -31,6 +31,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
           driver: auth.remote.driver ?? prefs.driver,
           team: auth.remote.team ?? prefs.team,
           lang: auth.remote.lang ?? prefs.lang,
+          timezone: auth.remote.timezone ?? prefs.timezone,
         };
         lastSent.current = JSON.stringify(merged);
         adopt(merged);

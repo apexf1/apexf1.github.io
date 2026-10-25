@@ -1,14 +1,23 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
   AuthenticateWithRedirectCallback,
   ClerkProvider,
   useClerk,
   useSignIn,
+  useSignUp,
   useUser,
 } from "@clerk/clerk-react";
 import { AuthContext, clerkKey, type AuthUser, type AuthValue } from "./authContext";
 import type { Prefs } from "./prefs";
+import { isValidTimeZone } from "./timezone";
+import {
+  IS_NATIVE,
+  closeNativeBrowser,
+  completeNativeGoogleSignIn,
+  isOAuthCallback,
+  openNativeGoogleSignIn,
+} from "./nativeAuth";
 
 const isSsoCallback = () => window.location.hash.startsWith("#sso-callback");
 
@@ -22,13 +31,15 @@ const readRemote = (metadata: unknown): Partial<Prefs> | null => {
   if (typeof raw.driver === "string" && raw.driver) out.driver = raw.driver;
   if (typeof raw.team === "string" && raw.team) out.team = raw.team;
   if (raw.lang === "pt" || raw.lang === "en") out.lang = raw.lang;
+  if (isValidTimeZone(raw.timezone)) out.timezone = raw.timezone;
   return Object.keys(out).length ? out : null;
 };
 
 function Bridge({ children }: { children: ReactNode }) {
   const { user, isLoaded } = useUser();
-  const { signOut: clerkSignOut } = useClerk();
+  const { signOut: clerkSignOut, setActive } = useClerk();
   const { signIn } = useSignIn();
+  const { signUp } = useSignUp();
   const [error, setError] = useState<string | null>(null);
 
   const metadata = user?.unsafeMetadata;
@@ -42,6 +53,15 @@ function Bridge({ children }: { children: ReactNode }) {
       return;
     }
     setError(null);
+    // no APK o consentimento do Google tem de acontecer no browser do sistema
+    if (IS_NATIVE) {
+      void openNativeGoogleSignIn(signIn).catch(() => {
+        setError(
+          "Não foi possível abrir o Google. Se continuar, autoriza com.apexf1.hub://sso-callback no Clerk, em Native applications.",
+        );
+      });
+      return;
+    }
     const base = `${window.location.origin}${window.location.pathname}`;
     void signIn
       .authenticateWithRedirect({
@@ -53,6 +73,50 @@ function Bridge({ children }: { children: ReactNode }) {
         setError("Não foi possível abrir o login do Google. Tenta outra vez.");
       });
   }, [signIn]);
+
+  // regresso do browser do sistema: com.apexf1.hub://sso-callback?rotating_token_nonce=…
+  useEffect(() => {
+    if (!IS_NATIVE || !signIn) return;
+    let disposed = false;
+    let remove: (() => Promise<void>) | null = null;
+
+    const finish = async (url: string) => {
+      if (!isOAuthCallback(url)) return;
+      await closeNativeBrowser();
+      const nonce = new URL(url).searchParams.get("rotating_token_nonce");
+      if (!nonce) {
+        setError("O Google voltou à app sem a confirmação do Clerk. Tenta entrar outra vez.");
+        return;
+      }
+      try {
+        const result = await completeNativeGoogleSignIn(signIn, signUp ?? null, setActive, nonce);
+        if (result === "incomplete") {
+          setError("Faltou concluir o registo no Clerk. Tenta entrar outra vez.");
+        } else {
+          setError(null);
+        }
+      } catch {
+        setError("Não foi possível concluir o login. Tenta outra vez.");
+      }
+    };
+
+    void (async () => {
+      const { App: NativeApp } = await import("@capacitor/app");
+      const handle = await NativeApp.addListener("appUrlOpen", ({ url }) => void finish(url));
+      remove = handle.remove;
+      if (disposed) {
+        void handle.remove();
+        return;
+      }
+      const launch = await NativeApp.getLaunchUrl();
+      if (launch?.url) void finish(launch.url);
+    })();
+
+    return () => {
+      disposed = true;
+      if (remove) void remove();
+    };
+  }, [signIn, signUp, setActive]);
 
   const signOut = useCallback(() => {
     void clerkSignOut({

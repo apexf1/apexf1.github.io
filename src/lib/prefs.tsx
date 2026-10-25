@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { detectLang, setActiveLang, type Lang } from "./language";
+import { isValidTimeZone, setActiveTimeZone } from "./timezone";
 
 export type Theme = "dark" | "light";
 
@@ -9,10 +10,18 @@ export interface Prefs {
   driver: string | null;
   team: string | null;
   lang: Lang;
+  /** IANA (ex.: "Europe/Lisbon"); null segue o fuso do dispositivo */
+  timezone: string | null;
 }
 
 export const PREFS_KEY = "apex.prefs.v2";
-export const DEFAULT_PREFS: Prefs = { theme: "dark", driver: null, team: null, lang: detectLang() };
+export const DEFAULT_PREFS: Prefs = {
+  theme: "dark",
+  driver: null,
+  team: null,
+  lang: detectLang(),
+  timezone: null,
+};
 
 export function sanitizePrefs(input: unknown, fallback: Prefs = DEFAULT_PREFS): Prefs {
   const raw = (input ?? {}) as Partial<Prefs>;
@@ -21,6 +30,7 @@ export function sanitizePrefs(input: unknown, fallback: Prefs = DEFAULT_PREFS): 
     driver: typeof raw.driver === "string" && raw.driver ? raw.driver : null,
     team: typeof raw.team === "string" && raw.team ? raw.team : null,
     lang: raw.lang === "en" || raw.lang === "pt" ? raw.lang : fallback.lang,
+    timezone: isValidTimeZone(raw.timezone) ? raw.timezone : fallback.timezone,
   };
 }
 
@@ -60,6 +70,8 @@ interface PrefsValue {
   setDriver: (code: string | null) => void;
   setTeam: (id: string | null) => void;
   setLang: (lang: Lang) => void;
+  /** null = automático (fuso do dispositivo) */
+  setTimeZone: (zone: string | null) => void;
   /** aplica preferências vindas da conta (login em outro dispositivo) */
   adopt: (prefs: Prefs) => void;
 }
@@ -69,8 +81,9 @@ const PrefsContext = createContext<PrefsValue | null>(null);
 export function PrefsProvider({ children }: { children: ReactNode }) {
   const [prefs, setPrefs] = useState<Prefs>(loadPrefs);
 
-  // formatadores fora de React (datas, números) seguem o idioma já nesta render.
+  // formatadores fora de React (datas, números) seguem o idioma e o fuso já nesta render.
   setActiveLang(prefs.lang);
+  setActiveTimeZone(prefs.timezone);
 
   useEffect(() => {
     applyTheme(prefs.theme);
@@ -82,14 +95,19 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
   const setDriver = useCallback((driver: string | null) => setPrefs((p) => ({ ...p, driver })), []);
   const setTeam = useCallback((team: string | null) => setPrefs((p) => ({ ...p, team })), []);
   const setLang = useCallback((lang: Lang) => setPrefs((p) => ({ ...p, lang })), []);
+  const setTimeZone = useCallback(
+    (timezone: string | null) =>
+      setPrefs((p) => ({ ...p, timezone: isValidTimeZone(timezone) ? timezone : null })),
+    [],
+  );
   const adopt = useCallback(
     (next: Prefs) => setPrefs((current) => ({ ...sanitizePrefs(next, current), theme: next.theme })),
     [],
   );
 
   const value = useMemo(
-    () => ({ prefs, setTheme, setDriver, setTeam, setLang, adopt }),
-    [prefs, setTheme, setDriver, setTeam, setLang, adopt],
+    () => ({ prefs, setTheme, setDriver, setTeam, setLang, setTimeZone, adopt }),
+    [prefs, setTheme, setDriver, setTeam, setLang, setTimeZone, adopt],
   );
 
   return <PrefsContext.Provider value={value}>{children}</PrefsContext.Provider>;

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">APEX F1</string>
+    <string name="title_activity_main">APEX F1</string>
+    <string name="package_name">com.apexf1.hub</string>
+    <string name="custom_url_scheme">com.apexf1.hub</string>
+</resources>

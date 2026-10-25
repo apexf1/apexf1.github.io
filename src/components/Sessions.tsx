@@ -36,9 +36,11 @@ import {
   formatDateTime,
   formatLapTime,
   formatTime,
+  formatZone,
   raceLabel,
 } from "../lib/format";
 import { useI18n } from "../lib/i18n";
+import { useLiveWeekend } from "../lib/live";
 import { useNow } from "../lib/storage";
 import { Avatar } from "./ui";
 
@@ -61,7 +63,21 @@ export default function Sessions() {
   const railRef = useRef<HTMLDivElement | null>(null);
 
   const weekend = weekendByRound.get(round);
-  const sessions = useMemo(() => weekend?.sessions ?? [], [weekend]);
+  // resultados em directo da OpenF1; o JSON da build fica como fallback offline
+  const live = useLiveWeekend(round, weekend?.meetingKey ?? null, round === upcoming.round);
+  const sessions = useMemo(() => {
+    const bundled = weekend?.sessions ?? [];
+    if (!live.sessions) return bundled;
+    // se a fonte falhar a meio, não se perdem os tempos que já estavam na build
+    return live.sessions.map((session) => {
+      const previous = bundled.find((item) => item.id === session.id);
+      return {
+        ...session,
+        results: session.results ?? previous?.results,
+        quali: session.quali ?? previous?.quali,
+      };
+    });
+  }, [live.sessions, weekend]);
   const race = raceByRound.get(round) ?? calendar[0];
   const raceDone = resultsByRound.has(round);
 
@@ -143,7 +159,13 @@ export default function Sessions() {
           <span className="tag">
             <Timer size={11} /> {t("FP1 · FP2 · FP3 · Qualificação")}
           </span>
-          <span className="tag">{t("dados {date}", { date: formatDate(sessionsGenerated) })}</span>
+          <span className="tag">
+            {live.updatedAt
+              ? t("atualizado às {time}", {
+                  time: formatTime(new Date(live.updatedAt).toISOString()),
+                })
+              : t("dados {date}", { date: formatDate(sessionsGenerated) })}
+          </span>
         </div>
       </div>
 
@@ -275,7 +297,7 @@ export default function Sessions() {
                     <h2>{labelFor(active)}</h2>
                     <div className="session-meta">
                       <CalendarDays size={13} />
-                      {formatDateTime(active.start)} {t("(Brasília)")}
+                      {formatDateTime(active.start)} ({formatZone()})
                       {countdown && countdown.diff > 0 && (
                         <span className="session-countdown">
                           {t("Faltam {days}d {hours}h {minutes}m", {
@@ -319,7 +341,10 @@ export default function Sessions() {
                     <p>
                       {state === "live"
                         ? t("Os tempos aparecem aqui assim que a fonte os publicar.")
-                        : t("Começa a {date} (Brasília).", { date: formatDateTime(active.start) })}
+                        : t("Começa a {date} ({zone}).", {
+                            date: formatDateTime(active.start),
+                            zone: formatZone(),
+                          })}
                     </p>
                   </div>
                 )}
@@ -473,7 +498,9 @@ export default function Sessions() {
                     <div className="session-source">
                       <span>
                         {active.id === "quali"
-                          ? t("Tempos oficiais Q1/Q2/Q3 · Jolpica-F1")
+                          ? t("Tempos Q1/Q2/Q3 · {source}", {
+                              source: active.quali?.length ? "OpenF1" : "Jolpica-F1",
+                            })
                           : t("Melhor volta de cada piloto · OpenF1")}
                       </span>
                       {partial && (
