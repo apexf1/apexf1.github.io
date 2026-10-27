@@ -8,6 +8,8 @@
  * na qualificação, os tempos de Q1/Q2/Q3 de cada piloto.
  *
  * Uso: npm run data:sessions
+ *      npm run data:sessions -- --only-new   (só sessões ainda sem resultados,
+ *                                            para o refresh automático)
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
@@ -20,6 +22,23 @@ const BASE = "https://api.openf1.org/v1";
 const USER_AGENT = "apex-f1/1.0 (data build)";
 
 const season = JSON.parse(await readFile(resolve(root, "src/data/season2026.json"), "utf8"));
+
+const onlyNew = process.argv.includes("--only-new");
+const existing = await readFile(OUT, "utf8")
+  .then((raw) => JSON.parse(raw))
+  .catch(() => null);
+
+/** Rondas e sessões que já têm tempos publicados: não vale a pena pedir de novo. */
+const published = new Map(
+  (existing?.rounds ?? []).map((weekend) => [
+    weekend.round,
+    new Map(
+      weekend.sessions
+        .filter((session) => session.results?.length || session.quali?.length)
+        .map((session) => [session.id, session]),
+    ),
+  ]),
+);
 
 const sleep = (ms) => new Promise((resolveSleep) => setTimeout(resolveSleep, ms));
 
@@ -122,8 +141,16 @@ for (const race of season.calendar) {
       .sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
 
     for (const session of sessions) {
+      const id = ids[session.session_name];
+      const done = published.get(race.round)?.get(id);
+      if (onlyNew && done) {
+        // mantém a classificação já guardada em vez de voltar a pedi-la
+        entry.sessions.push(done);
+        continue;
+      }
+
       const record = {
-        id: ids[session.session_name],
+        id,
         name: session.session_name,
         start: session.date_start,
         end: session.date_end,
@@ -135,7 +162,9 @@ for (const race of season.calendar) {
         session.session_name.startsWith("Practice") ||
         session.session_name === "Sprint Qualifying" ||
         isQuali;
-      if (timed && !session.is_cancelled) {
+      // no refresh automático não vale a pena pedir sessões que ainda não acabaram
+      const started = new Date(session.date_end).getTime() <= Date.now();
+      if (timed && !session.is_cancelled && !(onlyNew && !started)) {
         if (requests > 0) await sleep(700);
         requests += 1;
         try {
@@ -213,6 +242,16 @@ const output = {
   rounds,
 };
 
-await writeFile(OUT, JSON.stringify(output));
-const size = (await readFile(OUT)).length;
-console.log(`\nEscrito ${OUT} (${(size / 1024).toFixed(1)} KB), ${requests} pedidos de resultados.`);
+// Sem dados novos não reescreve o ficheiro: o refresh automático não deve
+// criar um commit a cada 30 minutos só por causa do timestamp.
+const sameAsExisting =
+  existing &&
+  JSON.stringify({ ...output, generated: null }) === JSON.stringify({ ...existing, generated: null });
+
+if (sameAsExisting) {
+  console.log(`\nSem sessões novas (${requests} pedidos); ${OUT} mantido.`);
+} else {
+  await writeFile(OUT, JSON.stringify(output));
+  const size = (await readFile(OUT)).length;
+  console.log(`\nEscrito ${OUT} (${(size / 1024).toFixed(1)} KB), ${requests} pedidos de resultados.`);
+}

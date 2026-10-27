@@ -13,6 +13,7 @@
     "android:open": "npx cap open android",
     "android:run": "npm run android:sync && npx cap run android",
     "data:history": "node scripts/build-history.mjs",
+    "data:season": "node scripts/build-season.mjs",
     "data:sessions": "node scripts/build-sessions.mjs"
   },
   "dependencies": {

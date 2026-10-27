@@ -8,7 +8,9 @@ describe("dados da temporada", () => {
     expect(season.teams).toHaveLength(11);
     expect(activeDrivers).toHaveLength(22);
     expect(calendar).toHaveLength(23);
-    expect(season.results).toHaveLength(17);
+    // os dados são regenerados a cada ronda: o arquivo tem de chegar à última
+    expect(season.results.at(-1)?.round).toBe(season.throughRound);
+    expect(season.results.length).toBeGreaterThanOrEqual(17);
   });
 
   it("tem um replay completo de Singapura", () => {
@@ -76,7 +78,7 @@ describe("modelo de previsão", () => {
 
   it("calcula os cenários de título", () => {
     const title = getTitlePicture();
-    expect(title.remainingRaces).toBe(6);
+    expect(title.remainingRaces).toBe(calendar.length - season.throughRound);
     expect(title.leader.code).toBe("ANT");
     expect(title.aliveCount).toBeGreaterThanOrEqual(2);
     console.log(

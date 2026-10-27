@@ -4,21 +4,75 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # a cada 30 minutos: apanha as sessões que acabaram de ser publicadas
+  schedule:
+    - cron: "*/30 * * * *"
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build:
+  dados:
     runs-on: ubuntu-latest
+    outputs:
+      publicar: ${{ steps.estado.outputs.publicar }}
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Se a API falhar, o site continua a publicar os últimos dados guardados.
+      - name: Atualizar dados (Jolpica-F1 + OpenF1)
+        continue-on-error: true
+        run: |
+          npm run data:season
+          npm run data:sessions -- --only-new
+
+      - name: Guardar dados novos no repositório
+        id: commit
+        run: |
+          if [ -z "$(git status --porcelain -- src/data)" ]; then
+            echo "Nada novo: os dados já estavam atualizados."
+            echo "mudou=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "apex-data-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data
+          git commit -m "dados: resultados atualizados a partir da Jolpica e da OpenF1"
+          git pull --rebase --autostash
+          git push
+          echo "mudou=true" >> "$GITHUB_OUTPUT"
+
+      - id: estado
+        run: |
+          # um push ou um pedido manual publica sempre; o cron só quando há dados novos
+          if [ "${{ steps.commit.outputs.mudou }}" = "true" ] || [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "publicar=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publicar=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: dados
+    if: needs.dados.outputs.publicar == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      # a ponta da branch, para apanhar o commit de dados que o job anterior criou
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-node@v4
         with:
